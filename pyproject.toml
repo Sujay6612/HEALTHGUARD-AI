@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "heartiq-prediction"
+version = "1.0.0"
+description = "Heart Disease Prediction ML Application using Flask"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+keywords = ["machine-learning", "heart-disease", "prediction", "flask"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Healthcare Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "numpy>=1.21.0",
+    "pandas>=1.3.0",
+    "scikit-learn>=1.0.0",
+    "Flask>=2.0.0",
+    "Werkzeug>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/heart_prediction"
+Documentation = "https://github.com/yourusername/heart_prediction#readme"
+Repository = "https://github.com/yourusername/heart_prediction.git"
+
+[project.scripts]
+heartiq-app = "app:run"
+
+[tool.setuptools]
+py-modules = ["app", "train_model"]
+include-package-data = true

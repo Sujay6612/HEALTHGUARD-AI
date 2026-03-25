@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeartIQ Portal</title>
+    <style>
+        :root { --bg:#08111d; --card:rgba(11,21,37,.84); --stroke:rgba(255,255,255,.08); --text:#eef5ff; --muted:#9db0cd; --accent:#4dd4ff; --warm:#f8b84e; --success:#4ade80; --danger:#ff6b6b; --radius:24px; --shadow:0 26px 80px rgba(0,0,0,.28); }
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; font-family:"Segoe UI","Trebuchet MS",sans-serif; color:var(--text); background:radial-gradient(circle at 12% 12%, rgba(77,212,255,.16), transparent 24%),radial-gradient(circle at 88% 14%, rgba(248,184,78,.14), transparent 22%),linear-gradient(160deg,#07101a 0%,#0b1625 55%,#101f33 100%); }
+        .shell { width:min(1160px,calc(100% - 2rem)); margin:0 auto; padding:28px 0 40px; }
+        .glass { background:var(--card); border:1px solid var(--stroke); border-radius:var(--radius); box-shadow:var(--shadow); backdrop-filter:blur(18px); }
+        .eyebrow { display:inline-flex; padding:10px 14px; border-radius:999px; background:rgba(77,212,255,.09); color:#a9ecff; border:1px solid rgba(77,212,255,.18); font-size:.82rem; letter-spacing:.14em; text-transform:uppercase; }
+        .muted { color:var(--muted); line-height:1.65; }
+        h1,h2,h3 { margin:0; }
+        .login-wrap { min-height:calc(100vh - 68px); display:grid; place-items:center; }
+        .auth-layout,.hero-grid,.overview-grid,.chart-grid,.metric-grid,.stat-grid,.form-grid,.admin-grid,.admin-stack,.search-results,.record-list,.settings-grid,.action-cluster,.note-list { display:grid; gap:20px; }
+        .auth-layout,.hero-grid,.overview-grid { grid-template-columns:1fr 1fr; }
+        .chart-grid { grid-template-columns:1fr 1fr; }
+        .metric-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+        .stat-grid { grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:24px; }
+        .admin-grid { grid-template-columns:1.12fr .88fr; margin-top:22px; }
+        .settings-grid { grid-template-columns:1fr 1fr; margin-top:18px; }
+        .action-cluster { grid-template-columns:repeat(2,minmax(0,1fr)); margin-top:18px; }
+        .auth-hero,.auth-panel,.hero-panel,.summary-panel,.tab-panel,.mini-panel { padding:28px; }
+        .auth-hero h1,.hero-panel h1 { font-size:clamp(2.4rem,5vw,4.2rem); line-height:.96; letter-spacing:-.04em; margin:18px 0 14px; }
+        .feature-list,.timeline-list,.candidate-grid,.game-wrap { display:grid; gap:12px; margin-top:22px; }
+        .feature-item,.stat-card,.chart-box,.timeline-item,.metric-card,.candidate-box,.comparison-box,.game-card,.game-stat,.result-card,.danger-card,.alert-row,.record-row,.search-card,.action-card { padding:16px 18px; border-radius:20px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); }
+        .auth-tabs,.tab-buttons,.actions,.utility-row { display:flex; gap:10px; flex-wrap:wrap; }
+        .actions { margin-top:18px; }
+        .utility-row { justify-content:space-between; align-items:center; }
+        .tab-chip,.button { border:none; border-radius:16px; padding:12px 16px; font:inherit; font-weight:700; cursor:pointer; }
+        .tab-chip { background:rgba(255,255,255,.04); color:var(--text); border:1px solid rgba(255,255,255,.08); }
+        .tab-chip.active { background:rgba(77,212,255,.15); border-color:rgba(77,212,255,.25); }
+        .button.primary { color:#05111a; background:linear-gradient(135deg,#9dedff 0%,#58d7ff 45%,#1ea8f1 100%); }
+        .button.secondary { color:var(--text); background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); text-decoration:none; }
+        .button.logout { color:#ffd0d0; background:rgba(255,107,107,.12); border:1px solid rgba(255,107,107,.18); }
+        .button.danger { color:#ffd0d0; background:rgba(255,107,107,.14); border:1px solid rgba(255,107,107,.25); }
+        .auth-panel section,.tab-content { display:none; }
+        .auth-panel section.active,.tab-content.active { display:block; }
+        .field-grid,.timeline-item { display:grid; gap:14px; }
+        .field-grid { margin-top:18px; }
+        .form-grid { grid-template-columns:1fr 1fr; margin-top:18px; }
+        .full-span { grid-column:1 / -1; }
+        .field { display:flex; flex-direction:column; gap:8px; }
+        .field label { font-weight:700; font-size:.96rem; }
+        input,select,button { font:inherit; }
+        input[type="text"],input[type="password"],input[type="number"],select { width:100%; padding:14px 15px; color:var(--text); border-radius:16px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); outline:none; }
+        .alert { margin-top:16px; padding:14px 16px; border-radius:18px; }
+        .alert.error { background:rgba(255,107,107,.12); color:#ffc9c9; border:1px solid rgba(255,107,107,.2); }
+        .alert.success { background:rgba(74,222,128,.12); color:#c8f7d6; border:1px solid rgba(74,222,128,.2); }
+        .status-badge { display:inline-flex; padding:10px 14px; border-radius:999px; font-weight:700; width:fit-content; }
+        .status-badge.good { background:rgba(74,222,128,.12); color:#cbf7d6; border:1px solid rgba(74,222,128,.2); }
+        .status-badge.warn { background:rgba(248,184,78,.12); color:#ffe1b1; border:1px solid rgba(248,184,78,.2); }
+        .status-badge.danger { background:rgba(255,107,107,.12); color:#ffd0d0; border:1px solid rgba(255,107,107,.2); }
+        .stat-card strong,.metric-card strong,.candidate-box strong,.game-stat strong { display:block; line-height:1.1; margin-bottom:6px; word-break:break-word; }
+        .stat-card span,.metric-card span,.candidate-box span,.game-stat span { display:block; }
+        .comparison-box.improved { background:rgba(74,222,128,.09); border-color:rgba(74,222,128,.2); }
+        .comparison-box.declined { background:rgba(255,107,107,.08); border-color:rgba(255,107,107,.18); }
+        .comparison-box.stable,.comparison-box.first_visit { background:rgba(77,212,255,.08); border-color:rgba(77,212,255,.18); }
+        .list { margin:12px 0 0; padding-left:18px; }
+        .list li + li { margin-top:8px; }
+        .timeline-item,.candidate-box { grid-template-columns:1.2fr 1fr 1fr; align-items:center; }
+        .candidate-box { grid-template-columns:1.1fr 1fr 1fr 1fr; }
+        .chart-box svg { width:100%; height:180px; display:block; }
+        .guidance-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:18px; }
+        .guidance-card { padding:16px 18px; border-radius:20px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); }
+        .guidance-card strong { display:block; margin-bottom:8px; }
+        .guidance-card.priority { background:rgba(248,184,78,.1); border-color:rgba(248,184,78,.22); }
+        .guidance-card.positive { background:rgba(74,222,128,.1); border-color:rgba(74,222,128,.2); }
+        .guidance-card.urgent { background:rgba(255,107,107,.1); border-color:rgba(255,107,107,.2); }
+        .urgency-chip { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; margin-top:12px; font-size:.82rem; font-weight:700; }
+        .urgency-chip.high { background:rgba(255,107,107,.12); color:#ffd0d0; border:1px solid rgba(255,107,107,.2); }
+        .urgency-chip.moderate { background:rgba(248,184,78,.12); color:#ffe1b1; border:1px solid rgba(248,184,78,.2); }
+        .urgency-chip.lower { background:rgba(74,222,128,.12); color:#cbf7d6; border:1px solid rgba(74,222,128,.2); }
+        .trend-banner { display:flex; justify-content:space-between; gap:14px; align-items:center; padding:16px 18px; border-radius:20px; margin-top:16px; border:1px solid rgba(255,255,255,.08); }
+        .trend-banner.improved { background:rgba(74,222,128,.12); border-color:rgba(74,222,128,.22); }
+        .trend-banner.declined { background:rgba(255,107,107,.12); border-color:rgba(255,107,107,.22); }
+        .trend-banner.stable,.trend-banner.first_visit { background:rgba(77,212,255,.1); border-color:rgba(77,212,255,.2); }
+        .trend-pill { min-width:120px; text-align:center; padding:14px 16px; border-radius:18px; background:rgba(255,255,255,.08); }
+        .trend-pill strong { display:block; font-size:1.6rem; margin-bottom:6px; }
+        .trend-symbol { font-size:1.7rem; margin-right:6px; vertical-align:middle; }
+        .memory-board { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        .heart-pad { min-height:110px; border:none; border-radius:22px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); color:var(--text); font-size:1.9rem; font-weight:700; cursor:pointer; transition:transform .18s ease, background .18s ease, box-shadow .18s ease; }
+        .heart-pad.active { transform:translateY(-2px) scale(1.02); background:rgba(77,212,255,.18); box-shadow:0 0 28px rgba(77,212,255,.26); }
+        .heart-pad[data-pad="0"].active { background:rgba(255,107,107,.24); box-shadow:0 0 28px rgba(255,107,107,.24); }
+        .heart-pad[data-pad="1"].active { background:rgba(248,184,78,.24); box-shadow:0 0 28px rgba(248,184,78,.24); }
+        .heart-pad[data-pad="2"].active { background:rgba(77,212,255,.22); box-shadow:0 0 28px rgba(77,212,255,.24); }
+        .heart-pad[data-pad="3"].active { background:rgba(74,222,128,.22); box-shadow:0 0 28px rgba(74,222,128,.24); }
+        .game-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+        .game-copy { min-height:52px; }
+        .volume-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:14px; }
+        .volume-row input[type="range"] { width:180px; padding:0; }
+        .admin-stack,.search-results,.record-list,.note-list { gap:14px; margin-top:18px; }
+        .search-form { display:grid; grid-template-columns:1fr auto; gap:12px; margin-top:18px; }
+        .search-card,.record-row,.alert-row,.result-card,.action-card { display:grid; gap:10px; }
+        .record-row,.alert-row { grid-template-columns:1.1fr .9fr .8fr; align-items:center; }
+        .result-card .actions,.danger-card .actions,.action-card .actions { margin-top:8px; }
+        .tiny-label { display:block; margin-top:6px; color:var(--muted); font-size:.9rem; }
+        .inline-meta { display:flex; flex-wrap:wrap; gap:10px; margin-top:6px; }
+        .inline-meta span { display:inline-flex; padding:8px 10px; border-radius:999px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); color:var(--muted); font-size:.86rem; }
+        .alert-row.high { background:rgba(255,107,107,.1); border-color:rgba(255,107,107,.24); }
+        .danger-card { background:rgba(255,107,107,.08); border-color:rgba(255,107,107,.2); }
+        .action-card { background:rgba(77,212,255,.07); border-color:rgba(77,212,255,.16); }
+        .mono { font-family:"Consolas","Courier New",monospace; }
+        .note-list { margin:14px 0 0; padding-left:18px; }
+        .note-list li + li { margin-top:8px; }
+        .footer-note { text-align:center; margin-top:24px; color:rgba(238,245,255,.64); font-size:.92rem; }
+        @media (max-width:1024px) { .auth-layout,.hero-grid,.overview-grid,.chart-grid,.metric-grid,.stat-grid,.form-grid,.timeline-item,.candidate-box,.game-stats,.guidance-grid,.admin-grid,.record-row,.alert-row,.settings-grid,.action-cluster,.search-form { grid-template-columns:1fr; } }
+        @media (max-width:720px) { .shell { width:min(100% - 1rem,100%); padding-top:16px; } .auth-hero,.auth-panel,.hero-panel,.summary-panel,.tab-panel,.mini-panel { padding:22px; } }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        {% if not logged_in %}
+            <div class="login-wrap">
+                <div class="auth-layout">
+                    <section class="glass auth-hero">
+                        <span class="eyebrow">HeartIQ patient portal</span>
+                        <h1>Beat Memory Lab.</h1>
+                        <p class="muted">A short heart rhythm flashes across the pads. Watch the pattern, then repeat it in the same order. It is simpler, cleaner, and still fits the heart theme.</p>
+                        <div class="game-wrap">
+                            <div class="game-card">
+                                <div class="memory-board">
+                                    <button class="heart-pad" type="button" data-pad="0">A</button>
+                                    <button class="heart-pad" type="button" data-pad="1">B</button>
+                                    <button class="heart-pad" type="button" data-pad="2">C</button>
+                                    <button class="heart-pad" type="button" data-pad="3">D</button>
+                                </div>
+                                <div class="actions">
+                                    <button class="button primary" type="button" id="playMemorySequence">Play Sequence</button>
+                                    <button class="button secondary" type="button" id="resetMemoryGame">Reset Game</button>
+                                </div>
+                                <div class="volume-row">
+                                    <label for="beatVolume">Beat Volume</label>
+                                    <input id="beatVolume" type="range" min="0" max="100" value="40">
+                                    <span class="muted" id="beatVolumeLabel">40%</span>
+                                </div>
+                                <p class="muted game-copy" id="memoryMessage">Press play, watch the four-beat pattern, then repeat it by tapping the pads in order.</p>
+                            </div>
+                            <div class="game-stats">
+                                <div class="game-stat"><strong id="memoryScore">0</strong><span class="muted">Correct rounds</span></div>
+                                <div class="game-stat"><strong id="memoryProgress">0/4</strong><span class="muted">Current input</span></div>
+                                <div class="game-stat"><strong id="memoryState">Waiting</strong><span class="muted">Rhythm state</span></div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="glass auth-panel">
+                        <div class="auth-tabs">
+                            <button class="tab-chip {% if auth_tab != 'register' %}active{% endif %}" type="button" data-auth-tab="login">Log In</button>
+                            <button class="tab-chip {% if auth_tab == 'register' %}active{% endif %}" type="button" data-auth-tab="register">Create Account</button>
+                            <button class="tab-chip {% if auth_tab == 'admin' %}active{% endif %}" type="button" data-auth-tab="admin">Admin</button>
+                        </div>
+                        {% if auth_error %}<div class="alert error">{{ auth_error }}</div>{% endif %}
+                        <section id="auth-login" class="{% if auth_tab != 'register' %}active{% endif %}">
+                            <h2 style="margin-top:22px;">Patient Login</h2>
+                            <p class="muted" style="margin-top:8px;">Enter your patient ID and password to open your dashboard.</p>
+                            <form method="POST" action="/login">
+                                <div class="field-grid">
+                                    <div class="field"><label for="login_patient_id">Patient ID</label><input id="login_patient_id" name="patient_id" type="text" placeholder="Example: P001" required></div>
+                                    <div class="field"><label for="login_password">Password</label><input id="login_password" name="password" type="password" placeholder="Enter password" required></div>
+                                </div>
+                                <div class="actions"><button class="button primary" type="submit">Log In</button></div>
+                            </form>
+                        </section>
+                        <section id="auth-register" class="{% if auth_tab == 'register' %}active{% endif %}">
+                            <h2 style="margin-top:22px;">Create Account</h2>
+                            <p class="muted" style="margin-top:8px;">Create a patient login once, then reuse it for future visits.</p>
+                            <form method="POST" action="/register">
+                                <div class="field-grid">
+                                    <div class="field"><label for="register_patient_name">Patient Name</label><input id="register_patient_name" name="patient_name" type="text" placeholder="Enter full name" required></div>
+                                    <div class="field"><label for="register_patient_id">Patient ID</label><input id="register_patient_id" name="patient_id" type="text" placeholder="Example: P001" required></div>
+                                    <div class="field"><label for="register_password">Password</label><input id="register_password" name="password" type="password" placeholder="Create password" required></div>
+                                    <div class="field"><label for="register_confirm_password">Confirm Password</label><input id="register_confirm_password" name="confirm_password" type="password" placeholder="Confirm password" required></div>
+                                </div>
+                                <div class="actions"><button class="button primary" type="submit">Create Account</button></div>
+                            </form>
+                        </section>
+                        <section id="auth-admin" class="{% if auth_tab == 'admin' %}active{% endif %}">
+                            <h2 style="margin-top:22px;">Admin Login</h2>
+                            <p class="muted" style="margin-top:8px;">Use the admin account to manage the portal and review stored records.</p>
+                            <form method="POST" action="/admin-login">
+                                <div class="field-grid">
+                                    <div class="field"><label for="admin_id">Admin ID</label><input id="admin_id" name="admin_id" type="text" placeholder="Enter admin ID" required></div>
+                                    <div class="field"><label for="admin_password">Password</label><input id="admin_password" name="password" type="password" placeholder="Enter admin password" required></div>
+                                </div>
+                                <div class="actions"><button class="button primary" type="submit">Admin Log In</button></div>
+                            </form>
+                        </section>
+                    </section>
+                </div>
+            </div>
+        {% else %}
+            {% if is_admin %}
+            <section class="hero-grid">
+                <div class="glass hero-panel">
+                    <span class="eyebrow">Admin workspace</span>
+                    <h1>Welcome, {{ patient.patient_name }}</h1>
+                    <p class="muted">You are signed in as the app owner. Review system activity, patient totals, and the latest saved visits from one place.</p>
+                    {% if auth_success %}<div class="alert success">{{ auth_success }}</div>{% endif %}
+                    <div class="stat-grid">
+                        <div class="stat-card"><strong>{{ admin_profile.patient_count }}</strong><span class="muted">Tracked patients</span></div>
+                        <div class="stat-card"><strong>{{ admin_profile.visit_count }}</strong><span class="muted">Stored visits</span></div>
+                        <div class="stat-card"><strong>{{ training_summary.model_name }}</strong><span class="muted">Active model</span></div>
+                    </div>
+                </div>
+                <div class="glass summary-panel">
+                    <div class="utility-row">
+                        <div><h2>Admin Actions</h2><p class="muted" style="margin-top:8px;">Review the latest portal activity and sign out when done.</p></div>
+                        <form method="POST" action="/logout"><button class="button logout" type="submit">Log Out</button></form>
+                    </div>
+                    <div class="metric-grid" style="margin-top:22px;">
+                        <div class="metric-card"><strong>{% if training_summary.accuracy is not none %}{{ (training_summary.accuracy * 100)|round(1) }}%{% else %}--{% endif %}</strong><span class="muted">Accuracy</span></div>
+                        <div class="metric-card"><strong>{% if training_summary.precision is not none %}{{ (training_summary.precision * 100)|round(1) }}%{% else %}--{% endif %}</strong><span class="muted">Precision</span></div>
+                        <div class="metric-card"><strong>{% if training_summary.recall is not none %}{{ (training_summary.recall * 100)|round(1) }}%{% else %}--{% endif %}</strong><span class="muted">Recall</span></div>
+                        <div class="metric-card"><strong>{% if training_summary.roc_auc is not none %}{{ (training_summary.roc_auc * 100)|round(1) }}%{% else %}--{% endif %}</strong><span class="muted">ROC-AUC</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="glass tab-panel" style="margin-top:24px;">
+                <div class="tab-buttons">
+                    <button class="tab-chip active" type="button" data-dashboard-tab="admin-overview">Overview</button>
+                    <button class="tab-chip" type="button" data-dashboard-tab="admin-patients">Patients</button>
+                    <button class="tab-chip" type="button" data-dashboard-tab="admin-alerts">Alerts</button>
+                    <button class="tab-chip" type="button" data-dashboard-tab="admin-analytics">Analytics</button>
+                    <button class="tab-chip" type="button" data-dashboard-tab="admin-model">Model Info</button>
+                    <button class="tab-chip" type="button" data-dashboard-tab="admin-settings">Settings</button>
+                </div>
+
+                <div id="tab-admin-overview" class="tab-content active">
+                    <div class="admin-grid">
+                        <div class="admin-stack">
+                            <div class="mini-panel">
+                                <h2>Recent Patient Activity</h2>
+                                {% if recent_patients %}
+                                    <div class="record-list">
+                                        {% for visit in recent_patients %}
+                                            <div class="record-row">
+                                                <div>
+                                                    <strong>{{ visit.patient_name }}</strong>
+                                                    <span class="tiny-label">ID: {{ visit.patient_id }}</span>
+                                                </div>
+                                                <div class="muted">{{ visit.created_label }}<br>{{ visit.prediction_label }}</div>
+                                                <div>
+                                                    <strong>{{ visit.risk_probability }}%</strong>
+                                                    <span class="tiny-label">Risk probability</span>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="muted" style="margin-top:14px;">No patient visits are stored yet.</p>
+                                {% endif %}
+                            </div>
+                            <div class="mini-panel">
+                                <h2>Quick Admin Actions</h2>
+                                <div class="action-cluster">
+                                    <div class="action-card">
+                                        <strong>Export all patient records</strong>
+                                        <p class="muted">Download one CSV containing every stored visit for offline review.</p>
+                                        <div class="actions"><a class="button secondary" href="/admin/export/all">Export All CSV</a></div>
+                                    </div>
+                                    <div class="danger-card">
+                                        <strong>Clear every patient record</strong>
+                                        <p class="muted">This removes all patient accounts and saved history. Use only when you want a full reset.</p>
+                                        <form method="POST" action="/admin/clear-records" onsubmit="return confirm('Clear all patient records and accounts? This cannot be undone.');">
+                                            <div class="actions"><button class="button danger" type="submit">Clear All Records</button></div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="admin-stack">
+                            <div class="mini-panel">
+                                <h2>System Snapshot</h2>
+                                <div class="metric-grid" style="margin-top:18px;">
+                                    <div class="metric-card"><strong>{{ admin_analytics.weekly_visits }}</strong><span class="muted">Visits this week</span></div>
+                                    <div class="metric-card"><strong>{{ admin_analytics.avg_risk }}%</strong><span class="muted">Average risk</span></div>
+                                    <div class="metric-card"><strong>{{ admin_analytics.high_risk_count }}</strong><span class="muted">High-risk visits</span></div>
+                                    <div class="metric-card"><strong>{{ admin_analytics.moderate_risk_count }}</strong><span class="muted">Moderate-risk visits</span></div>
+                                </div>
+                            </div>
+                            <div class="mini-panel">
+                                <h2>Owner Account</h2>
+                                {% if admin_error %}<div class="alert error">{{ admin_error }}</div>{% endif %}
+                                <div class="result-card">
+                                    <strong>{{ admin_profile.admin_name }}</strong>
+                                    <div class="inline-meta">
+                                        <span><span class="mono">{{ admin_profile.admin_id }}</span></span>
+                                        <span>{{ admin_profile.patient_count }} patient accounts</span>
+                                        <span>{{ admin_profile.visit_count }} stored visits</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-admin-patients" class="tab-content">
+                    <div class="admin-grid">
+                        <div class="mini-panel">
+                            <h2>Patient Search</h2>
+                            <p class="muted" style="margin-top:8px;">Search by patient ID or name, then open a patient to review full history and take action.</p>
+                            <form class="search-form" method="GET" action="/">
+                                <input type="text" name="admin_search" value="{{ admin_search_query }}" placeholder="Search patient ID or name">
+                                <button class="button primary" type="submit">Search</button>
+                            </form>
+                            {% if admin_search_query and not admin_search_results %}
+                                <div class="alert error">No patients matched "{{ admin_search_query }}".</div>
+                            {% endif %}
+                            {% if admin_search_results %}
+                                <div class="search-results">
+                                    {% for match in admin_search_results %}
+                                        <div class="search-card">
+                                            <div>
+                                                <strong>{{ match.patient_name }}</strong>
+                                                <span class="tiny-label">ID: {{ match.patient_id }}</span>
+                                            </div>
+                                            <div class="inline-meta">
+                                                <span>{{ match.visit_count }} visits</span>
+                                                <span>Last seen {{ match.last_seen }}</span>
+                                            </div>
+                                            <div class="actions">
+                                                <a class="button secondary" href="/?admin_search={{ admin_search_query|urlencode }}&selected_patient={{ match.patient_id|urlencode }}">Open History</a>
+                                                <a class="button secondary" href="/admin/export/patient/{{ match.patient_id }}">Export CSV</a>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mini-panel">
+                            <h2>Selected Patient</h2>
+                            {% if selected_patient_summary %}
+                                <div class="result-card">
+                                    <strong>{{ selected_patient_summary.patient_name }}</strong>
+                                    <div class="inline-meta">
+                                        <span><span class="mono">{{ selected_patient_summary.patient_id }}</span></span>
+                                        <span>{{ selected_patient_summary.visit_count }} saved visits</span>
+                                        <span>Last seen {{ selected_patient_summary.last_seen }}</span>
+                                    </div>
+                                    <div class="actions">
+                                        <a class="button secondary" href="/admin/export/patient/{{ selected_patient_summary.patient_id }}">Export Patient CSV</a>
+                                        <form method="POST" action="/admin/delete-patient/{{ selected_patient_summary.patient_id }}" onsubmit="return confirm('Delete this patient account and all saved visits?');">
+                                            <button class="button danger" type="submit">Delete Patient</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="record-list">
+                                    {% for visit in selected_patient_history %}
+                                        <div class="record-row">
+                                            <div>
+                                                <strong>{{ visit.created_label }}</strong>
+                                                <span class="tiny-label">{{ visit.prediction_label }}</span>
+                                            </div>
+                                            <div class="muted">
+                                                Age {{ visit.age }}, BP {{ visit.bp }}, Chol {{ visit.chol }}, ECG {{ visit.ecg }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ visit.risk_probability }}%</strong>
+                                                <span class="tiny-label">Risk</span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="muted" style="margin-top:14px;">Select a patient from search results to view full history and admin actions.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-admin-alerts" class="tab-content">
+                    <div class="admin-grid">
+                        <div class="mini-panel">
+                            <h2>Highest-Risk Alerts</h2>
+                            <p class="muted" style="margin-top:8px;">These are the most concerning recent visits based on predicted risk.</p>
+                            {% if risk_alerts %}
+                                <div class="record-list">
+                                    {% for alert in risk_alerts %}
+                                        <div class="alert-row high">
+                                            <div>
+                                                <strong>{{ alert.patient_name }}</strong>
+                                                <span class="tiny-label">ID: {{ alert.patient_id }}</span>
+                                            </div>
+                                            <div class="muted">
+                                                {{ alert.created_label }}<br>
+                                                BP {{ alert.bp }}, Chol {{ alert.chol }}, ECG {{ alert.ecg }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ alert.risk_probability }}%</strong>
+                                                <span class="tiny-label">{{ alert.prediction_label }}</span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="muted" style="margin-top:14px;">No high-risk visits have been stored yet.</p>
+                            {% endif %}
+                        </div>
+                        <div class="mini-panel">
+                            <h2>Alert Guidance</h2>
+                            <div class="result-card">
+                                <strong>How to use this list</strong>
+                                <ul class="note-list">
+                                    <li>Use the Patients tab to open any alert and review the full history before acting.</li>
+                                    <li>Export an individual patient CSV when you want to share or archive a record set.</li>
+                                    <li>Use this as a screening aid only, not as a medical diagnosis.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-admin-analytics" class="tab-content">
+                    <div class="mini-panel" style="margin-top:22px;">
+                        <h2>Admin Analytics Dashboard</h2>
+                        <div class="metric-grid" style="margin-top:18px;">
+                            <div class="metric-card"><strong>{{ admin_analytics.patient_count }}</strong><span class="muted">Patient accounts</span></div>
+                            <div class="metric-card"><strong>{{ admin_analytics.visit_count }}</strong><span class="muted">Total visits</span></div>
+                            <div class="metric-card"><strong>{{ admin_analytics.weekly_visits }}</strong><span class="muted">Visits this week</span></div>
+                            <div class="metric-card"><strong>{{ admin_analytics.avg_risk }}%</strong><span class="muted">Average risk</span></div>
+                            <div class="metric-card"><strong>{{ admin_analytics.high_risk_count }}</strong><span class="muted">High-risk visits</span></div>
+                            <div class="metric-card"><strong>{{ admin_analytics.moderate_risk_count }}</strong><span class="muted">Moderate-risk visits</span></div>
+                            <div class="metric-card"><strong>{{ admin_analytics.visit_count - admin_analytics.high_risk_count - admin_analytics.moderate_risk_count }}</strong><span class="muted">Lower-risk visits</span></div>
+                            <div class="metric-card"><strong>{% if admin_analytics.patient_count %}{{ (admin_analytics.visit_count / admin_analytics.patient_count)|round(1) }}{% else %}0{% endif %}</strong><span class="muted">Avg visits per patient</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-admin-model" class="tab-content">
+                    <div class="admin-grid">
+                        <div class="mini-panel">
+                            <h2>Model Quality</h2>
+                            <p class="muted" style="margin-top:8px;">{{ training_summary.model_name }} from {{ training_summary.data_source }}{% if training_summary.trained_at %}<br>Last trained: {{ training_summary.trained_at }}{% endif %}</p>
+                            <div class="metric-grid" style="margin-top:18px;">
+                                <div class="metric-card"><strong>{% if training_summary.accuracy is not none %}{{ (training_summary.accuracy * 100)|round(1) }}%{% else %}--{% endif %}</strong><span class="muted">Accuracy</span></div>
+                                <div class="metric-card"><strong>{% if training_summary.precision is not none %}{{ (training_summary.precision * 100)|round(1) }}%{% else %}--{% endif %}</strong><span class="muted">Precision</span></div>
+                                <div class="metric-card"><strong>{% if training_summary.recall is not none %}{{ (training_summary.recall * 100)|round(1) }}%{% else %}--{% endif %}</strong><span class="muted">Recall</span></div>
+                                <div class="metric-card"><strong>{% if training_summary.roc_auc is not none %}{{ (training_summary.roc_auc * 100)|round(1) }}%{% else %}--{% endif %}</strong><span class="muted">ROC-AUC</span></div>
+                            </div>
+                            {% if training_summary.candidate_results %}
+                                <div class="candidate-grid">
+                                    {% for candidate in training_summary.candidate_results %}
+                                        <div class="candidate-box">
+                                            <div><strong>{{ candidate.name }}</strong><span class="muted">Candidate model</span></div>
+                                            <div><strong>{% if candidate.accuracy is not none %}{{ (candidate.accuracy * 100)|round(1) }}%{% else %}--{% endif %}</strong><span class="muted">Accuracy</span></div>
+                                            <div><strong>{% if candidate.f1 is not none %}{{ (candidate.f1 * 100)|round(1) }}%{% else %}--{% endif %}</strong><span class="muted">F1</span></div>
+                                            <div><strong>{% if candidate.roc_auc is not none %}{{ (candidate.roc_auc * 100)|round(1) }}%{% else %}--{% endif %}</strong><span class="muted">ROC-AUC</span></div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="mini-panel">
+                            <h2>Training Notes</h2>
+                            {% if training_summary.notes %}
+                                <ul class="note-list">
+                                    {% for note in training_summary.notes %}
+                                        <li class="muted">{{ note }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="muted" style="margin-top:14px;">No training notes are available for the current model.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-admin-settings" class="tab-content">
+                    <div class="admin-grid">
+                        <div class="mini-panel">
+                            <h2>Update Admin Credentials</h2>
+                            <p class="muted" style="margin-top:8px;">Change the admin ID, display name, and password used for owner access.</p>
+                            <form method="POST" action="/admin/update-credentials">
+                                <div class="settings-grid">
+                                    <div class="field">
+                                        <label for="settings_admin_id">Admin ID</label>
+                                        <input id="settings_admin_id" name="admin_id" type="text" value="{{ admin_profile.admin_id }}" required>
+                                    </div>
+                                    <div class="field">
+                                        <label for="settings_admin_name">Admin Name</label>
+                                        <input id="settings_admin_name" name="admin_name" type="text" value="{{ admin_profile.admin_name }}" required>
+                                    </div>
+                                    <div class="field">
+                                        <label for="settings_admin_password">New Password</label>
+                                        <input id="settings_admin_password" name="password" type="password" placeholder="Enter new password" required>
+                                    </div>
+                                    <div class="field">
+                                        <label for="settings_admin_confirm_password">Confirm Password</label>
+                                        <input id="settings_admin_confirm_password" name="confirm_password" type="password" placeholder="Confirm new password" required>
+                                    </div>
+                                </div>
+                                <div class="actions"><button class="button primary" type="submit">Save Admin Credentials</button></div>
+                            </form>
+                        </div>
+                        <div class="mini-panel">
+                            <h2>Data Controls</h2>
+                            <div class="action-cluster">
+                                <div class="action-card">
+                                    <strong>Export all stored data</strong>
+                                    <p class="muted">Download every saved patient visit into one CSV file.</p>
+                                    <div class="actions"><a class="button secondary" href="/admin/export/all">Download All Records</a></div>
+                                </div>
+                                <div class="danger-card">
+                                    <strong>Reset the patient database</strong>
+                                    <p class="muted">This removes all patient accounts and visits but leaves the admin account and model files intact.</p>
+                                    <form method="POST" action="/admin/clear-records" onsubmit="return confirm('Delete all patient records and patient accounts?');">
+                                        <div class="actions"><button class="button danger" type="submit">Clear Database</button></div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            {% else %}
+            <section class="hero-grid">
+                <div class="glass hero-panel">
+                    <span class="eyebrow">Signed in securely</span>
+                    <h1>Welcome, {{ patient.patient_name }}</h1>
+                    <p class="muted">Your portal is ready. Record a new screening, review how your latest reading compares with earlier visits, and export your saved history whenever you need it.</p>
+                    {% if auth_success %}<div class="alert success">{{ auth_success }}</div>{% endif %}
+                    <div class="stat-grid">
+                        <div class="stat-card"><strong>{{ patient_profile.patient_id }}</strong><span class="muted">Patient ID</span></div>
+                        <div class="stat-card"><strong>{{ patient_profile.visit_count }}</strong><span class="muted">Saved visits</span></div>
+                        <div class="stat-card"><strong>{{ patient_profile.last_seen }}</strong><span class="muted">Last activity</span></div>
+                    </div>
+                </div>
+                <div class="glass summary-panel">
+                    <div class="utility-row">
+                        <div><h2>Quick Actions</h2><p class="muted" style="margin-top:8px;">Run a new prediction, export your history, or sign out.</p></div>
+                        <form method="POST" action="/logout"><button class="button logout" type="submit">Log Out</button></form>
+                    </div>
+                    <div class="actions"><a class="button secondary" href="/export/history">Export CSV</a></div>
+                    {% if prediction %}
+                        <div style="margin-top:24px;">
+                            <span class="status-badge {% if prediction.probability >= 70 %}danger{% elif prediction.probability >= 40 %}warn{% else %}good{% endif %}">{{ prediction.label }}</span>
+                            <div class="metric-grid" style="margin-top:18px;">
+                                <div class="metric-card"><strong>{{ prediction.probability }}%</strong><span class="muted">Risk probability</span></div>
+                                <div class="metric-card"><strong>{{ prediction.confidence }}%</strong><span class="muted">Model confidence</span></div>
+                                <div class="metric-card"><strong>{{ prediction.level }}</strong><span class="muted">Attention level</span></div>
+                                <div class="metric-card">
+                                    <strong>
+                                        {% if comparison %}
+                                            {% if comparison.status == 'improved' %}{{ comparison.change_percent }}% down
+                                            {% elif comparison.status == 'declined' %}{{ comparison.change_percent }}% up
+                                            {% else %}0.0%{% endif %}
+                                        {% else %}
+                                            {{ patient_profile.visit_count }}
+                                        {% endif %}
+                                    </strong>
+                                    <span class="muted">{% if comparison %}Trend vs last visit{% else %}Tracked visits{% endif %}</span>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div style="margin-top:24px;"><span class="status-badge good">Ready for a new reading</span><p class="muted" style="margin-top:12px;">Submit your screening details to populate the latest result and comparison summary.</p></div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="glass tab-panel" style="margin-top:24px;">
+                <div class="tab-buttons">
+                    <button class="tab-chip active" type="button" data-dashboard-tab="overview">Overview</button>
+                    <button class="tab-chip" type="button" data-dashboard-tab="history">History</button>
+                    <button class="tab-chip" type="button" data-dashboard-tab="analytics">Analytics</button>
+                    <button class="tab-chip" type="button" data-dashboard-tab="model">Model Info</button>
+                </div>
+
+                <div id="tab-overview" class="tab-content active">
+                    <div class="overview-grid" style="margin-top:22px;">
+                        <div class="mini-panel">
+                            <h2>New Screening</h2>
+                            <p class="muted" style="margin-top:8px;">Patient identity is handled by login now, so this form stays focused on health inputs only.</p>
+                            {% if errors %}<div class="alert error">{% for error in errors %}<div>{{ error }}</div>{% endfor %}</div>{% endif %}
+                            <form method="POST">
+                                <div class="form-grid">
+                                    <div class="field"><label for="age">Age</label><input id="age" name="age" type="number" min="{{ feature_ranges['age']['min'] }}" max="{{ feature_ranges['age']['max'] }}" value="{{ form_data['age'] }}" required></div>
+                                    <div class="field"><label for="sex">Sex</label><select id="sex" name="sex" required><option value="1" {% if form_data['sex'] == 1 %}selected{% endif %}>Male</option><option value="0" {% if form_data['sex'] == 0 %}selected{% endif %}>Female</option></select></div>
+                                    <div class="field"><label for="bp">Resting Blood Pressure</label><input id="bp" name="bp" type="number" min="{{ feature_ranges['bp']['min'] }}" max="{{ feature_ranges['bp']['max'] }}" value="{{ form_data['bp'] }}" required></div>
+                                    <div class="field"><label for="chol">Cholesterol</label><input id="chol" name="chol" type="number" min="{{ feature_ranges['chol']['min'] }}" max="{{ feature_ranges['chol']['max'] }}" value="{{ form_data['chol'] }}" required></div>
+                                    <div class="field full-span"><label for="ecg">Resting ECG Result</label><select id="ecg" name="ecg" required><option value="0" {% if form_data['ecg'] == 0 %}selected{% endif %}>0 - Typical</option><option value="1" {% if form_data['ecg'] == 1 %}selected{% endif %}>1 - Mild variation</option><option value="2" {% if form_data['ecg'] == 2 %}selected{% endif %}>2 - Higher concern</option></select></div>
+                                </div>
+                                <div class="actions"><button class="button primary" type="submit">Run Prediction</button></div>
+                            </form>
+                        </div>
+                        <div class="mini-panel">
+                            <h2>Latest Result</h2>
+                            {% if prediction %}
+                                <p class="muted" style="margin-top:8px;">{{ prediction.summary }}</p>
+                                <ul class="list">{% for insight in prediction.insights %}<li>{{ insight }}</li>{% endfor %}</ul>
+                                <div class="guidance-grid">
+                                    <div class="guidance-card positive">
+                                        <strong>What Is Improving</strong>
+                                        {% if prediction.guidance.wins %}
+                                            <ul class="list">{% for item in prediction.guidance.wins %}<li>{{ item }}</li>{% endfor %}</ul>
+                                        {% else %}
+                                            <p class="muted">No major strength signal yet. Keep tracking to identify wins over time.</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="guidance-card priority">
+                                        <strong>What To Work On Next</strong>
+                                        <ul class="list">
+                                            {% for item in prediction.guidance.focus %}
+                                                <li>{{ item }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                        <div class="urgency-chip {{ prediction.guidance.urgency }}">
+                                            {% if prediction.guidance.urgency == 'high' %}High priority
+                                            {% elif prediction.guidance.urgency == 'moderate' %}Moderate priority
+                                            {% else %}Lower priority{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if comparison %}
+                                    <div class="trend-banner {{ comparison.status }}">
+                                        <div>
+                                            <strong>{{ comparison.headline }}</strong>
+                                            <p class="muted" style="margin-top:8px;">{{ comparison.summary }}</p>
+                                        </div>
+                                        <div class="trend-pill">
+                                            <strong>
+                                                <span class="trend-symbol">{{ comparison.trend_symbol }}</span>
+                                                {% if comparison.status == 'improved' %}{{ comparison.change_percent }}% down
+                                                {% elif comparison.status == 'declined' %}{{ comparison.change_percent }}% up
+                                                {% elif comparison.status == 'stable' %}0.0%
+                                                {% else %}New{% endif %}
+                                            </strong>
+                                            <span class="muted">{{ comparison.trend_label }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="comparison-box {{ comparison.status }}" style="margin-top:18px;">
+                                        <strong>Detailed comparison</strong>
+                                        {% if comparison.improvements %}<ul class="list">{% for item in comparison.improvements %}<li>{{ item }}</li>{% endfor %}</ul>{% endif %}
+                                        {% if comparison.declines %}<ul class="list">{% for item in comparison.declines %}<li>{{ item }}</li>{% endfor %}</ul>{% endif %}
+                                        {% if comparison.tips %}<ul class="list">{% for tip in comparison.tips %}<li>{{ tip }}</li>{% endfor %}</ul>{% endif %}
+                                        <p class="muted" style="margin-top:12px;"><strong>Next focus:</strong> {{ comparison.next_focus }}</p>
+                                    </div>
+                                {% endif %}
+                                <div class="guidance-grid">
+                                    <div class="guidance-card {% if prediction.guidance.urgency == 'high' %}urgent{% endif %}">
+                                        <strong>Diet</strong>
+                                        <ul class="list">{% for item in prediction.guidance.diet %}<li>{{ item }}</li>{% endfor %}</ul>
+                                    </div>
+                                    <div class="guidance-card">
+                                        <strong>Exercise</strong>
+                                        <ul class="list">{% for item in prediction.guidance.exercise %}<li>{{ item }}</li>{% endfor %}</ul>
+                                    </div>
+                                    <div class="guidance-card">
+                                        <strong>Sleep & Recovery</strong>
+                                        <ul class="list">{% for item in prediction.guidance.sleep %}<li>{{ item }}</li>{% endfor %}</ul>
+                                    </div>
+                                    <div class="guidance-card {% if prediction.guidance.urgency != 'lower' %}priority{% endif %}">
+                                        <strong>Checkups & Follow-up</strong>
+                                        <ul class="list">{% for item in prediction.guidance.checkups %}<li>{{ item }}</li>{% endfor %}</ul>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <p class="muted" style="margin-top:8px;">Your result summary, improvement notes, and personalized tips will appear here after you submit a reading.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-history" class="tab-content">
+                    <div class="mini-panel" style="margin-top:22px;">
+                        <h2>Recent Visits</h2>
+                        {% if patient_history %}
+                            <div class="timeline-list">
+                                {% for visit in patient_history %}
+                                    <div class="timeline-item">
+                                        <div><strong>{{ visit.created_label }}</strong><span class="muted">{{ visit.prediction_label }}</span></div>
+                                        <div class="muted">Risk: {{ visit.risk_probability }}%<br>BP: {{ visit.bp }} mmHg</div>
+                                        <div class="muted">Chol: {{ visit.chol }} mg/dL<br>ECG: {{ visit.ecg }}</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="muted" style="margin-top:14px;">No saved history yet. Your first submitted reading will appear here.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div id="tab-analytics" class="tab-content">
+                    <div class="mini-panel" style="margin-top:22px;">
+                        <h2>Trend Charts</h2>
+                        <div class="chart-grid" style="margin-top:18px;">
+                            <div class="chart-box"><strong>Risk Probability</strong><svg id="riskChart" viewBox="0 0 320 180" preserveAspectRatio="none"></svg></div>
+                            <div class="chart-box"><strong>Blood Pressure</strong><svg id="bpChart" viewBox="0 0 320 180" preserveAspectRatio="none"></svg></div>
+                            <div class="chart-box"><strong>Cholesterol</strong><svg id="cholChart" viewBox="0 0 320 180" preserveAspectRatio="none"></svg></div>
+                            <div class="chart-box"><strong>ECG Trend</strong><svg id="ecgChart" viewBox="0 0 320 180" preserveAspectRatio="none"></svg></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-model" class="tab-content">
+                    <div class="mini-panel" style="margin-top:22px;">
+                        <h2>Model Quality</h2>
+                        <p class="muted" style="margin-top:8px;">{{ training_summary.model_name }} from {{ training_summary.data_source }}{% if training_summary.trained_at %}<br>Last trained: {{ training_summary.trained_at }}{% endif %}</p>
+                        <div class="metric-grid" style="margin-top:18px;">
+                            <div class="metric-card"><strong>{% if training_summary.accuracy is not none %}{{ (training_summary.accuracy * 100)|round(1) }}%{% else %}--{% endif %}</strong><span class="muted">Accuracy</span></div>
+                            <div class="metric-card"><strong>{% if training_summary.precision is not none %}{{ (training_summary.precision * 100)|round(1) }}%{% else %}--{% endif %}</strong><span class="muted">Precision</span></div>
+                            <div class="metric-card"><strong>{% if training_summary.recall is not none %}{{ (training_summary.recall * 100)|round(1) }}%{% else %}--{% endif %}</strong><span class="muted">Recall</span></div>
+                            <div class="metric-card"><strong>{% if training_summary.roc_auc is not none %}{{ (training_summary.roc_auc * 100)|round(1) }}%{% else %}--{% endif %}</strong><span class="muted">ROC-AUC</span></div>
+                        </div>
+                        {% if training_summary.candidate_results %}
+                            <div class="candidate-grid">
+                                {% for candidate in training_summary.candidate_results %}
+                                    <div class="candidate-box">
+                                        <div><strong>{{ candidate.model_name }}</strong><span class="muted">Candidate model</span></div>
+                                        <div><strong>{{ (candidate.cv_roc_auc * 100)|round(1) }}%</strong><span class="muted">CV ROC-AUC</span></div>
+                                        <div><strong>{{ (candidate.test_accuracy * 100)|round(1) }}%</strong><span class="muted">Test accuracy</span></div>
+                                        <div><strong>{{ (candidate.test_f1 * 100)|round(1) }}%</strong><span class="muted">Test F1</span></div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        {% if training_summary.notes %}<ul class="list">{% for note in training_summary.notes %}<li>{{ note }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                </div>
+            </section>
+            {% endif %}
+        {% endif %}
+        <p class="footer-note">Screening support only. This tool should not replace professional medical evaluation.</p>
+    </div>
+
+    <script>
+        document.querySelectorAll("[data-auth-tab]").forEach((button) => {
+            button.addEventListener("click", () => {
+                document.querySelectorAll("[data-auth-tab]").forEach((chip) => chip.classList.remove("active"));
+                document.querySelectorAll(".auth-panel section").forEach((section) => section.classList.remove("active"));
+                button.classList.add("active");
+                document.getElementById(`auth-${button.dataset.authTab}`).classList.add("active");
+            });
+        });
+
+        document.querySelectorAll("[data-dashboard-tab]").forEach((button) => {
+            button.addEventListener("click", () => {
+                document.querySelectorAll("[data-dashboard-tab]").forEach((chip) => chip.classList.remove("active"));
+                document.querySelectorAll(".tab-content").forEach((panel) => panel.classList.remove("active"));
+                button.classList.add("active");
+                document.getElementById(`tab-${button.dataset.dashboardTab}`).classList.add("active");
+            });
+        });
+
+        const memoryPads = Array.from(document.querySelectorAll(".heart-pad"));
+        const playMemorySequenceButton = document.getElementById("playMemorySequence");
+        const resetMemoryGameButton = document.getElementById("resetMemoryGame");
+        const memoryMessage = document.getElementById("memoryMessage");
+        const memoryScore = document.getElementById("memoryScore");
+        const memoryProgress = document.getElementById("memoryProgress");
+        const memoryState = document.getElementById("memoryState");
+        const beatVolume = document.getElementById("beatVolume");
+        const beatVolumeLabel = document.getElementById("beatVolumeLabel");
+        let memorySequence = [];
+        let memoryInput = [];
+        let memoryScoreValue = 0;
+        let memoryLocked = true;
+        let audioContext = null;
+        const beatFrequencies = [220, 262, 330, 392];
+
+        function getAudioContext() {
+            if (!window.AudioContext && !window.webkitAudioContext) return null;
+            if (!audioContext) {
+                const AudioCtor = window.AudioContext || window.webkitAudioContext;
+                audioContext = new AudioCtor();
+            }
+            if (audioContext.state === "suspended") {
+                audioContext.resume();
+            }
+            return audioContext;
+        }
+
+        function playBeat(index, duration = 0.16) {
+            const context = getAudioContext();
+            if (!context) return;
+
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+            const now = context.currentTime;
+            const volume = (Number(beatVolume?.value || 40) / 100) * 0.08;
+
+            oscillator.type = "sine";
+            oscillator.frequency.value = beatFrequencies[index] || 260;
+            gainNode.gain.setValueAtTime(0.0001, now);
+            gainNode.gain.exponentialRampToValueAtTime(Math.max(volume, 0.0001), now + 0.02);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination);
+            oscillator.start(now);
+            oscillator.stop(now + duration + 0.02);
+        }
+
+        function generateMemorySequence(length = 4) {
+            const nextSequence = [];
+            for (let index = 0; index < length; index += 1) {
+                nextSequence.push(Math.floor(Math.random() * memoryPads.length));
+            }
+            return nextSequence;
+        }
+
+        function flashPad(index) {
+            const pad = memoryPads[index];
+            if (!pad) return;
+            pad.classList.add("active");
+            playBeat(index);
+            window.setTimeout(() => pad.classList.remove("active"), 320);
+        }
+
+        function playSequence() {
+            memorySequence = generateMemorySequence(4);
+            memoryLocked = true;
+            memoryInput = [];
+            memoryProgress.textContent = `0/${memorySequence.length}`;
+            memoryState.textContent = "Playing";
+            memoryMessage.textContent = "Watch carefully, then repeat the same sequence.";
+
+            memorySequence.forEach((padIndex, stepIndex) => {
+                window.setTimeout(() => flashPad(padIndex), 550 * (stepIndex + 1));
+            });
+
+            window.setTimeout(() => {
+                memoryLocked = false;
+                memoryState.textContent = "Repeat";
+                memoryMessage.textContent = "Your turn. Tap the pads in the same order you just saw.";
+            }, 550 * (memorySequence.length + 1));
+        }
+
+        function resetMemoryGame() {
+            memorySequence = [];
+            memoryInput = [];
+            memoryScoreValue = 0;
+            memoryLocked = true;
+            memoryScore.textContent = "0";
+            memoryProgress.textContent = "0/0";
+            memoryState.textContent = "Waiting";
+            memoryMessage.textContent = "Press play to generate a new heart rhythm, then repeat it by tapping the pads in order.";
+            memoryPads.forEach((pad) => pad.classList.remove("active"));
+        }
+
+        function handlePadClick(index) {
+            if (memoryLocked) return;
+
+            flashPad(index);
+            memoryInput.push(index);
+            memoryProgress.textContent = `${memoryInput.length}/${memorySequence.length}`;
+
+            const currentIndex = memoryInput.length - 1;
+            if (memoryInput[currentIndex] !== memorySequence[currentIndex]) {
+                memoryLocked = true;
+                memoryInput = [];
+                memoryProgress.textContent = "0/4";
+                memoryState.textContent = "Miss";
+                memoryMessage.textContent = "Wrong beat. Press play and try the rhythm again.";
+                return;
+            }
+
+            if (memoryInput.length === memorySequence.length) {
+                memoryLocked = true;
+                memoryScoreValue += 1;
+                memoryScore.textContent = String(memoryScoreValue);
+                memoryState.textContent = "Perfect";
+                memoryMessage.textContent = "Correct rhythm. Press play again for a new sequence.";
+            }
+        }
+
+        if (playMemorySequenceButton) {
+            playMemorySequenceButton.addEventListener("click", playSequence);
+            resetMemoryGameButton.addEventListener("click", resetMemoryGame);
+            beatVolume.addEventListener("input", () => {
+                beatVolumeLabel.textContent = `${beatVolume.value}%`;
+            });
+            memoryPads.forEach((pad, index) => {
+                pad.addEventListener("click", () => handlePadClick(index));
+            });
+            resetMemoryGame();
+        }
+
+        const historyChartData = {{ patient_history_chart|default([], true)|tojson }};
+
+        function renderLineChart(svgId, points, color, suffix = "") {
+            const svg = document.getElementById(svgId);
+            if (!svg) return;
+            if (!points.length) {
+                svg.innerHTML = `<text x="160" y="90" text-anchor="middle" fill="rgba(238,245,255,0.6)" font-size="14">Save visits to view a chart</text>`;
+                return;
+            }
+            const width = 320, height = 180, padding = 24;
+            const values = points.map((point) => point.value);
+            const min = Math.min(...values), max = Math.max(...values), range = max - min || 1;
+            const coords = points.map((point, index) => {
+                const x = padding + (index * (width - padding * 2)) / Math.max(points.length - 1, 1);
+                const y = height - padding - ((point.value - min) / range) * (height - padding * 2);
+                return { ...point, x, y };
+            });
+            const path = coords.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
+            const area = `${path} L ${coords[coords.length - 1].x} ${height - padding} L ${coords[0].x} ${height - padding} Z`;
+            const dots = coords.map((point) => `<circle cx="${point.x}" cy="${point.y}" r="4.5" fill="${color}" /><text x="${point.x}" y="${point.y - 10}" text-anchor="middle" fill="#edf6ff" font-size="11">${point.value}${suffix}</text><text x="${point.x}" y="${height - 8}" text-anchor="middle" fill="rgba(238,245,255,0.55)" font-size="10">${point.label}</text>`).join("");
+            svg.innerHTML = `<line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="rgba(255,255,255,0.12)" /><line x1="${padding}" y1="${padding}" x2="${padding}" y2="${height - padding}" stroke="rgba(255,255,255,0.12)" /><path d="${area}" fill="${color}" opacity="0.12"></path><path d="${path}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>${dots}`;
+        }
+
+        function buildCharts() {
+            const points = historyChartData.map((visit, index) => ({ label: `V${index + 1}`, risk: visit.risk_probability, bp: visit.bp, chol: visit.chol, ecg: visit.ecg }));
+            renderLineChart("riskChart", points.map((item) => ({ label: item.label, value: item.risk })), "#4dd4ff", "%");
+            renderLineChart("bpChart", points.map((item) => ({ label: item.label, value: item.bp })), "#f8b84e");
+            renderLineChart("cholChart", points.map((item) => ({ label: item.label, value: item.chol })), "#ff8d6b");
+            renderLineChart("ecgChart", points.map((item) => ({ label: item.label, value: item.ecg })), "#4ade80");
+        }
+
+        buildCharts();
+    </script>
+</body>
+</html>

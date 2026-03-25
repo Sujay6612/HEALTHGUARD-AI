@@ -1,0 +1,8 @@
+include README.md
+include requirements.txt
+include model_metadata.json
+recursive-include templates *
+recursive-include data *
+recursive-exclude * __pycache__
+recursive-exclude * *.pyc
+recursive-exclude * .DS_Store

@@ -1,0 +1,25 @@
+{
+  "status": "evaluated",
+  "model_name": "logistic_regression",
+  "trained_at": "2026-03-24T20:23:48",
+  "data_source": "data\\processed.cleveland.data",
+  "features": [
+    "age",
+    "sex",
+    "trestbps",
+    "chol",
+    "restecg"
+  ],
+  "target_column": "target",
+  "row_count": 303,
+  "metrics": {
+    "accuracy": 0.623,
+    "precision": 0.5926,
+    "recall": 0.5714,
+    "roc_auc": 0.7165
+  },
+  "notes": [
+    "Metrics are measured on a held-out test split from the provided dataset.",
+    "Retrain after updating the dataset to keep the app's reported accuracy current."
+  ]
+}
