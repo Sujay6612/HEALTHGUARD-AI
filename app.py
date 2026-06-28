@@ -14,9 +14,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 
 BASE_DIR = Path(__file__).resolve().parent
-MODEL_PATH = BASE_DIR / "model.pkl"
-SCALER_PATH = BASE_DIR / "scaler.pkl"
-METADATA_PATH = BASE_DIR / "model_metadata.json"
+MODEL_PATH = BASE_DIR / "models" / "model.pkl"
+SCALER_PATH = BASE_DIR / "models" / "scaler.pkl"
+METADATA_PATH = BASE_DIR / "models" / "model_metadata.json"
 DB_PATH = BASE_DIR / "heartiq_records.db"
 ADMIN_ID = os.environ.get("HEARTIQ_ADMIN_ID", "ADMIN")
 ADMIN_PASSWORD = os.environ.get("HEARTIQ_ADMIN_PASSWORD", "admin123")

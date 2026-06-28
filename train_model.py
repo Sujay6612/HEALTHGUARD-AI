@@ -16,16 +16,13 @@ from sklearn.preprocessing import StandardScaler
 
 
 BASE_DIR = Path(__file__).resolve().parent
+MODELS_DIR = BASE_DIR / "models"
 DATA_CANDIDATES = [
-    BASE_DIR / "data" / "heart.csv",
-    BASE_DIR / "heart.csv",
-    BASE_DIR / "data" / "heart_disease.csv",
     BASE_DIR / "data" / "processed.cleveland.data",
-    BASE_DIR / "processed.cleveland.data",
 ]
-MODEL_PATH = BASE_DIR / "model.pkl"
-SCALER_PATH = BASE_DIR / "scaler.pkl"
-METADATA_PATH = BASE_DIR / "model_metadata.json"
+MODEL_PATH = MODELS_DIR / "model.pkl"
+SCALER_PATH = MODELS_DIR / "scaler.pkl"
+METADATA_PATH = MODELS_DIR / "model_metadata.json"
 
 APP_FEATURE_COLUMNS = ["age", "sex", "trestbps", "chol", "restecg"]
 TARGET_CANDIDATES = ["target", "condition", "output", "label", "num", "heartdisease"]
@@ -296,6 +293,8 @@ def train():
             best_model = search.best_estimator_
             best_metrics = metrics
             best_cv_score = float(search.best_score_)
+
+    MODELS_DIR.mkdir(exist_ok=True)
 
     with MODEL_PATH.open("wb") as file:
         pickle.dump(best_model, file)

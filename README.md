@@ -14,13 +14,9 @@ This project is now split into two responsibilities:
 
 ## To improve actual accuracy
 
-1. Add a real CSV dataset at one of these paths:
-   - `data/heart.csv`
-   - `heart.csv`
-   - `data/heart_disease.csv`
+1. Add the Cleveland dataset at:
    - `data/processed.cleveland.data`
-   - `processed.cleveland.data`
-2. If you downloaded the official UCI `heart+disease.zip`, extract `processed.cleveland.data` from the ZIP and place it in the project root or `data/`.
+2. If you downloaded the official UCI `heart+disease.zip`, extract `processed.cleveland.data` from the ZIP and place it in `data/`.
 3. Make sure the dataset includes these fields, using either the canonical names below or one of the supported aliases:
    - `age`
    - `sex` or `gender`
@@ -50,9 +46,9 @@ This project is now split into two responsibilities:
 - Trains multiple tuned candidate models using the same 5 app inputs
 - Selects the best model by cross-validated ROC-AUC
 - Saves:
-  - `model.pkl`
-  - `scaler.pkl` for backward compatibility
-  - `model_metadata.json` with accuracy, precision, recall, and ROC-AUC
+  - `models/model.pkl`
+  - `models/scaler.pkl` for backward compatibility
+  - `models/model_metadata.json` with accuracy, precision, recall, and ROC-AUC
 
 ## Important note
 

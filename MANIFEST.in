@@ -1,6 +1,8 @@
 include README.md
 include requirements.txt
-include model_metadata.json
+include models/model_metadata.json
+include models/model.pkl
+include models/scaler.pkl
 recursive-include templates *
 recursive-include data *
 recursive-exclude * __pycache__
