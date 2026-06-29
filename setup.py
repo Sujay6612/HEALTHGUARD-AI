@@ -5,14 +5,14 @@ this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text(encoding="utf-8")
 
 setup(
-    name="heartiq-prediction",
+    name="healthguard-ai",
     version="1.0.0",
-    description="Heart Disease Prediction ML Application using Flask",
+    description="HealthGuard AI: a Flask machine learning app for heart disease risk assessment and patient record tracking.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="Your Name",
-    author_email="your.email@example.com",
-    url="https://github.com/yourusername/heart_prediction",
+    author="B.Sujay",
+    author_email="sujayboddu@gmail.com",
+    url="https://github.com/Sujay6612/HEALTHGUARD-AI",
     license="MIT",
     packages=find_packages(),
     py_modules=["app", "train_model"],
@@ -24,11 +24,6 @@ setup(
         "Flask>=2.0.0",
         "Werkzeug>=2.0.0",
     ],
-    entry_points={
-        "console_scripts": [
-            "heartiq-app=app:run",
-        ],
-    },
     python_requires=">=3.8",
     classifiers=[
         "Development Status :: 4 - Beta",
